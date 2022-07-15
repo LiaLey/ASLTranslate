@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="darker_blue">#7bdff2</color>
+    <color name="darker_feedback_blue">#65B4C3</color>
+    <color name="light_blue">#b2f7ef</color>
+    <color name="white">#eff7f6</color>
+    <color name="light_pink">#f7d6e0</color>
+    <color name="dark_pink">#f2b5d4</color>
+    <color name="black">#FF000000</color>
+
+</resources>

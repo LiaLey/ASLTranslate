@@ -7,6 +7,8 @@ import android.graphics.Matrix;
 import android.widget.TextView;
 
 
+import com.example.asl.ui.translator_verify.Translator_verify;
+
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;
 import org.tensorflow.lite.support.common.FileUtil;
@@ -26,7 +28,6 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +64,22 @@ public class Translator {
         this.classify_text = classify_text;
     }
 
+    /**
+     * Constructor for translator
+     * @param activity - activity to process translator in
+     * @param camera_num - camera number to preprocess some part of the images before translator start to classify
+     * @param translator_verify - class to verify sign language displayed to camera
+     */
+    public Translator(Activity activity, int camera_num, Translator_verify translator_verify){
+        this.activity = activity;
+        this.translator_verify = translator_verify;
+        this.camera_num = camera_num;
+
+    }
+
+    // class to allow user to verify sign language
+    private Translator_verify translator_verify= null;
+
     //activity to process translator in
     private Activity activity;
 
@@ -79,7 +96,8 @@ public class Translator {
     //sise of the height of the image
     private  int imageSizeY;
 
-    // final probability to determine associated text to sign language showed to camera
+    // final probability to determine associated text to sign language showned to camera
+    // for normalizing for the model
     private final float IMAGE_MEAN = 0.0f;
     private final float IMAGE_STD = 1.0f;
     private final float PROBABILITY_MEAN = 0.0f;
@@ -88,6 +106,8 @@ public class Translator {
     // TFLite API interpreter, and helper functions
     protected Interpreter tflite;
     private TensorBuffer outputProbabilityBuffer;
+
+    // https://www.tensorflow.org/lite/api_docs/java/org/tensorflow/lite/support/common/TensorProcessor
     private TensorProcessor probabilityProcessor;
 
     // textview to show classified text to user
@@ -104,12 +124,10 @@ public class Translator {
 
         // Creates processor for the TensorImage.
         int cropSize = Math.min(bitmap.getWidth(), bitmap.getHeight());
-        // TODO(b/143564309): Fuse ops inside ImageProcessor.
 
         ImageProcessor imageProcessor =
                 new ImageProcessor.Builder()
                         .add(new ResizeWithCropOrPadOp(cropSize, cropSize))
-                        // TODO(b/169379396): investigate the impact of the resize algorithm on accuracy.
                         // To get the same inference results as lib_task_api, which is built on top of the Task
                         // Library, use ResizeMethod.BILINEAR.
                         .add(new ResizeOp(imageSizeX, imageSizeY, ResizeOp.ResizeMethod.NEAREST_NEIGHBOR))
@@ -131,7 +149,7 @@ public class Translator {
 
         try{
             //initializing the intepretor and loading the new category into the model
-            tflite = new Interpreter(loadmodelfile(activity,classify_category));   //get the activity from translator_fragment
+            tflite=new Interpreter(loadmodelfile(activity,classify_category));   //get the activity from translator_fragment
         }catch (Exception e) {
             e.printStackTrace();
         }
@@ -148,7 +166,7 @@ public class Translator {
         // get the actual file name based on the classify category
         String filename = classify_category + "/" + classify_category + "_" + "model.tflite";
 
-        //load the file
+        //load the file, allow u to load data inside the file
         AssetFileDescriptor fileDescriptor=activity.getAssets().openFd(filename);
         //open the tflite file
         FileInputStream inputStream=new FileInputStream(fileDescriptor.getFileDescriptor());
@@ -182,7 +200,9 @@ public class Translator {
 
         inputImageBuffer = new TensorImage(imageDataType);  //creating a new tensor image input
 
+        // output probability outputs the probability of each label being the image's label
         outputProbabilityBuffer = TensorBuffer.createFixedSize(probabilityShape, probabilityDataType);
+
         probabilityProcessor = new TensorProcessor.Builder().add(getPostprocessNormalizeOp()).build();
         //these are for the output of the model
 
@@ -192,14 +212,22 @@ public class Translator {
         inputImageBuffer = loadImage(input_to_tensor);
 
         //this gives the input into the mode, and get the result of the output
+        // the probability buffer will let us know which label has the highest probability
         tflite.run(inputImageBuffer.getBuffer(),outputProbabilityBuffer.getBuffer().rewind());
 
         // get the string classified from the input image into tflite
         String classify_result_text = set_classify_result();
 
 
-        //set the text of textview to display classified text to user
-        classify_text.setText(classify_result_text);
+        //if there is no textview to show the classified text in.
+        if(classify_text == null){
+            //tell the translator_verify that the text has been updated
+            translator_verify.text_changed(classify_result_text);
+        }
+        else{
+            //set the text of textview to display classified text to user
+            classify_text.setText(classify_result_text);
+        }
 
     }
 
@@ -215,6 +243,7 @@ public class Translator {
         }catch (Exception e){
             e.printStackTrace();
         }
+
         //getting the labelled probability in float for each label of the translator
         Map<String, Float> labeledProbability =
                 new TensorLabel(labels, probabilityProcessor.process(outputProbabilityBuffer))
@@ -246,7 +275,12 @@ public class Translator {
     private Bitmap rotate_for_tensor(Bitmap bitmap_image){
 
         int rotation_angle = 0;
+
         Bitmap scaledBitmap;
+
+        //https://developer.android.com/reference/android/graphics/Matrix
+        //transformation matrix 3 x 3
+
         Matrix matrix;
         Bitmap rotatedBitmap;
         if(camera_num == 0){
@@ -258,6 +292,8 @@ public class Translator {
             rotation_angle = 90;
         }
 
+        // transformation matrix, 3 x3
+        // https://developer.android.com/reference/android/graphics/Matrix
         matrix = new Matrix();
         //rotate according to the angle set based on the camera number
         matrix.postRotate(rotation_angle);

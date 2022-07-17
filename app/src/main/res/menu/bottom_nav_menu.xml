@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_translator"
+        android:icon = "@drawable/translator_icon"
+        android:title="Translator"
+        app:cnb_textColor="@color/black"
+        app:cnb_iconColor = "@color/black"
+        app:cnb_backgroundColor = "@color/light_blue"
+        />
+
+    <item
+        android:id="@+id/navigation_lesson"
+        android:icon = "@drawable/lesson_icon"
+        android:title="Lesson"
+        app:cnb_textColor="@color/black"
+        app:cnb_iconColor = "@color/black"
+        app:cnb_backgroundColor = "@color/light_blue"
+        />
+
+
+
+</menu>

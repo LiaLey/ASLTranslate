@@ -1,8 +1,5 @@
 package com.example.asl.controller.app_data;
 
-import android.util.Log;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 

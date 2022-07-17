@@ -33,10 +33,46 @@
             android:name=".ui.Splash_screen.Splash_screen"
             android:screenOrientation="portrait" />
 
+
         <activity
-        android:configChanges="orientation"
-        android:name=".ui.Translator_screen.Translator_screen"
-        android:screenOrientation="portrait" />
+            android:configChanges="orientation"
+            android:name=".ui.Home_screen.Home_screen"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:configChanges="orientation"
+            android:name=".ui.Lesson_screen.Topic.Adverbs"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:configChanges="orientation"
+            android:name=".ui.Lesson_screen.Topic.Alphabets"
+            android:screenOrientation="portrait" />
+        <activity
+            android:configChanges="orientation"
+            android:name=".ui.Lesson_screen.Topic.Attachments"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:configChanges="orientation"
+            android:name=".ui.Lesson_screen.Topic.Numbers"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:configChanges="orientation"
+            android:name=".ui.Lesson_screen.Topic.Pronouns"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:configChanges="orientation"
+            android:name=".ui.Lesson_screen_description.Lesson_screen_description"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:configChanges="orientation"
+            android:name=".ui.translator_verify.Translator_verify"
+            android:screenOrientation="portrait" />
+
 
     </application>
 

@@ -4,10 +4,23 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/SignLearn/New/app/src/main/res/layout/activity_main.xml" value="0.25" />
+        <entry key="..\:/SignLearn/New/app/src/main/res/layout/adverbs_menu.xml" value="0.36666666666666664" />
+        <entry key="..\:/SignLearn/New/app/src/main/res/layout/alphabets_menu.xml" value="0.36666666666666664" />
+        <entry key="..\:/SignLearn/New/app/src/main/res/layout/attachments_menu.xml" value="0.36666666666666664" />
         <entry key="..\:/SignLearn/New/app/src/main/res/layout/custom_dropdown.xml" value="0.36666666666666664" />
         <entry key="..\:/SignLearn/New/app/src/main/res/layout/custom_spinner_dropdown.xml" value="0.36666666666666664" />
+        <entry key="..\:/SignLearn/New/app/src/main/res/layout/custom_spinner_dropdown_icon.xml" value="0.36666666666666664" />
+        <entry key="..\:/SignLearn/New/app/src/main/res/layout/lesson_description_screen.xml" value="0.36666666666666664" />
+        <entry key="..\:/SignLearn/New/app/src/main/res/layout/lesson_screen.xml" value="0.33" />
+        <entry key="..\:/SignLearn/New/app/src/main/res/layout/lesson_verify.xml" value="0.19791666666666666" />
+        <entry key="..\:/SignLearn/New/app/src/main/res/layout/lesson_verofy.xml" value="0.36666666666666664" />
+        <entry key="..\:/SignLearn/New/app/src/main/res/layout/numbers_menu.xml" value="0.36666666666666664" />
+        <entry key="..\:/SignLearn/New/app/src/main/res/layout/pronouns_menu.xml" value="0.36666666666666664" />
         <entry key="..\:/SignLearn/New/app/src/main/res/layout/splash_screen.xml" value="0.25" />
+        <entry key="..\:/SignLearn/New/app/src/main/res/layout/sub_screen_action_bar.xml" value="0.36666666666666664" />
         <entry key="..\:/SignLearn/New/app/src/main/res/layout/translator_screen.xml" value="0.25" />
+        <entry key="..\:/SignLearn/New/app/src/main/res/menu/bottom_nav_menu.xml" value="2.5142857142857142" />
+        <entry key="..\:/Users/celia/Desktop/ASLTranslate/app/src/main/res/layout/pronouns_menu.xml" value="0.18541666666666667" />
       </map>
     </option>
   </component>

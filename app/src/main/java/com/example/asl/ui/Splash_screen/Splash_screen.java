@@ -107,7 +107,7 @@ public class Splash_screen extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // calls method to go to translator screen
-                translator_screen.go_to_new_screen("com.example.asl.ui.Translator_screen.Translator_screen", true);
+                translator_screen.go_to_new_screen("com.example.asl.ui.Home_screen.Home_screen", true);
             }
         });
 

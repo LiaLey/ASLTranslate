@@ -1,24 +1,29 @@
 package com.example.asl.ui.Translator_screen;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.Spinner;
+
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 
 import com.example.asl.R;
 import com.example.asl.controller.camera.Camera_handle;
@@ -27,7 +32,11 @@ import com.example.asl.controller.translator.Translator_categories;
 
 import java.util.HashMap;
 
-public class Translator_screen extends AppCompatActivity {
+public class Translator_screen extends Fragment {
+
+    // activity and context of translator fragment
+    private static Activity activity_here;
+    private static Context context_here;
 
     //layout components
     public FrameLayout framelayout;
@@ -53,14 +62,34 @@ public class Translator_screen extends AppCompatActivity {
     // handles translation of sign language to english text
     private Translator translator;
 
+    //view that contains all display elements
+    private View root;
+
     // handles all categories that is in sign language
     private Translator_categories translator_categories;
 
-    @Override
+    /**
+     * constructor for TranslatorFragment
+     * @param activity - activity of the fragment
+     * @param context - context of the fragment
+     */
+    public Translator_screen(Activity activity,Context context){
+        this.activity_here = activity;
+        this.context_here = context;
+    }
+
+    /**
+     * This method is called when the view is created for the first time, or each time user comes to "translator" winndow
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return root - Initialized view with all the elements in it.
+     */
     @RequiresApi(api = Build.VERSION_CODES.N)
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.translator_screen);
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container, Bundle savedInstanceState) {
+
+        root = inflater.inflate(R.layout.translator_screen, container, false);
 
         // get components displayed on screen
         set_layout_components();
@@ -72,9 +101,11 @@ public class Translator_screen extends AppCompatActivity {
         set_on_click_camera_permission();
 
         //creating new instance of camera_handle to handle camera connections
-        camera_handle = new Camera_handle(this,this,framelayout,classitext);
+        // comminicates with the translator
+        camera_handle = new Camera_handle(context_here,activity_here,framelayout,classitext);
 
         //getting the camera_handle's connection to translator (TFLITE)
+        // this allows us to load a new model into the translator when user changes the item in the drop down
         translator = camera_handle.getTranslator();
 
         //creating new class of translator categories
@@ -92,7 +123,7 @@ public class Translator_screen extends AppCompatActivity {
         //check if need to request for user's permission
         start_request_permission();
 
-
+        return root;
     }
 
 
@@ -102,7 +133,7 @@ public class Translator_screen extends AppCompatActivity {
      */
     private void init_drop_down(){
         //generating arrayadapter for spinner to customize spinner
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.custom_spinner_dropdown_icon,translator_categories.getItems());
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(context_here, R.layout.custom_spinner_dropdown_icon,translator_categories.getItems());
 
         //set the view of the drop down to look better with the theme of App
         adapter.setDropDownViewResource(R.layout.custom_spinner_dropdown);
@@ -146,18 +177,18 @@ public class Translator_screen extends AppCompatActivity {
      */
     private void set_layout_components(){
         //getting framelayout to show camera contents
-        framelayout = findViewById(R.id.camera_frame);
+        framelayout = root.findViewById(R.id.camera_frame);
 
         //get the text to show user texts after translator has classified sign language
-        classitext = findViewById(R.id.label_classification_text);
+        classitext = root.findViewById(R.id.label_classification_text);
 
         //get the button that allows user to switch camera inside the app.
-        change_camera = findViewById(R.id.switch_camera_icon);
+        change_camera = root.findViewById(R.id.switch_camera_icon);
 
         // find button that allows app to get user's permission
-        camera_permission = findViewById(R.id.allow_camera_permission_button);
+        camera_permission = root.findViewById(R.id.allow_camera_permission_button);
 
-        spinner_text_view = findViewById(R.id.spinner_text_view);
+        spinner_text_view = root.findViewById(R.id.spinner_text_view);
     }
 
     /**
@@ -195,7 +226,7 @@ public class Translator_screen extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void start_request_permission() {
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
+        if (ContextCompat.checkSelfPermission(context_here, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
             //permission is not granted by the user
             permission_not_granted(false);
 
@@ -219,7 +250,7 @@ public class Translator_screen extends AppCompatActivity {
 
         if(!permission_initially_granted){
             //permission was not initially granted by user, but recently granted by user
-            Toast.makeText(this, "Camera Permission Granted", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context_here, "Camera Permission Granted", Toast.LENGTH_SHORT).show();
 
         }
 
@@ -246,7 +277,7 @@ public class Translator_screen extends AppCompatActivity {
         // if user has clicked not to grant permission when dialog box appears
         if(user_clicked_no){
             // show a toast saying camera permission is not granted to user
-            Toast.makeText(this, "Camera Permission not Granted", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context_here, "Camera Permission not Granted", Toast.LENGTH_SHORT).show();
         }
 
         // enable camera permission button so that user can show toast to grant permission of app to camera
@@ -271,6 +302,9 @@ public class Translator_screen extends AppCompatActivity {
      */
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void request_permission_thread() {
+        // code for requesting camera permission
+        // it is written in android studio manifest about the permission required
+
         requestPermissions(new String[]{Manifest.permission.CAMERA}, 1);
     }
 
@@ -367,5 +401,22 @@ public class Translator_screen extends AppCompatActivity {
             //sets a button to be disabled to not allow user to interact with it
             view.setEnabled(false);
         }
+    }
+    /**
+     * Getter for activity of Translator Fragment. Used by classes that cannot access activity,
+     * such as navigationview
+     * @return activity - activity of translator fragment
+     */
+    public static Activity getActivity_here() {
+        return activity_here;
+    }
+
+    /**
+     * Getter for context of translator fragment, to be used by class that have no access
+     * to contexts
+     * @return context - context of translator fragment
+     */
+    public static Context getContext_here() {
+        return context_here;
     }
 }

@@ -2,11 +2,14 @@
 <resources>
 
     <color name="darker_blue">#7bdff2</color>
-    <color name="darker_feedback_blue">#65B4C3</color>
+    <color name="darker_feedback_blue">#12697A</color>
     <color name="light_blue">#b2f7ef</color>
     <color name="white">#eff7f6</color>
     <color name="light_pink">#f7d6e0</color>
     <color name="dark_pink">#f2b5d4</color>
     <color name="black">#FF000000</color>
+    <color name="grey">#2C2C2C</color>
+    <color name = "red">#fc0303</color>
+
 
 </resources>

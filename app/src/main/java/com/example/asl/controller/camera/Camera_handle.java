@@ -11,16 +11,13 @@ import android.hardware.Camera;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Hashtable;
-import java.util.List;
 
 import com.example.asl.controller.translator.Translator;
+import com.example.asl.ui.translator_verify.Translator_verify;
 
 /*
  * Utilizes camera API from android studio to connect with camera
@@ -54,10 +51,12 @@ public class Camera_handle {
 
 
     //interval between translation of frames from camera to prevent lag
-    private int translate_interval;
+    // tehrefore, the translator does not translate every frame from camera, rather every few frames once
+    private final int translate_interval = 3;
 
-    //counter to count the interval between each translation of image
-    private int interval_counter;
+    //counter to count the number of frames since last translation occured.
+    // Helps to determine an interval before the translation of next frame
+    private int interval_counter = 0;
 
     // height of framelayout to show contents of camera
     private int frame_layout_height;
@@ -72,16 +71,26 @@ public class Camera_handle {
 
         // set textview camera_type to set text to be displayed to user.
         this.framelayout = framelayout;
-        this.translate_interval = 3;
-        this.interval_counter = 0;
-        showcamera = new ShowCamera(context,camera,this);
+
+        // creating a new instance of translator for translating input image
         translator = new Translator(activity,camera_num,classify_text);
 
         this.frame_layout_height = 0;
 
     }
 
+    public Camera_handle(Context context, Activity activity, FrameLayout framelayout, Translator_verify translator_verify){
+        camera_num = 1;
+        this.context = context;
+        this.framelayout = framelayout;
 
+
+        showcamera = new ShowCamera(context,camera,this);
+        translator = new Translator(activity,camera_num,translator_verify);
+
+        this.frame_layout_height = 0;
+
+    }
 
     public void switch_camera_met(){
         //changing camera ID
@@ -102,10 +111,15 @@ public class Camera_handle {
 
         //initializing new camera
         initialize_camera();
+
+        // remove the previous view of camera
         framelayout.removeAllViews();
         showcamera.change_camera(camera);
+
+        // add new view after camera has been changed
         framelayout.addView(showcamera);
-        // Change text here.
+
+
         set_framelayout_dimensions_to_image_sizes();
 
         switching_camera_state = false;
@@ -175,6 +189,11 @@ public class Camera_handle {
      * This methods is called each time there is a frame received from the camera
      */
     private Camera.PreviewCallback previewCallback = new Camera.PreviewCallback() {
+        /**
+         *
+         * @param data - image data
+         * @param camera - camera that captured the data
+         */
         @Override
         public void onPreviewFrame(byte[] data, Camera camera) {
             //if the frame layout's width and height is not initialized to the correct height, which result in stretch imaage
@@ -199,15 +218,19 @@ public class Camera_handle {
                     //get the camera parameter
                     Camera.Parameters parameters = camera.getParameters();
 
-                    //compress camera output to jpeg
+                    //compress camera output to jpeg (data is a frane captured by camera) from an array of bytes
                     YuvImage yuvImage = new YuvImage(data, parameters.getPreviewFormat(), parameters.getPreviewSize().width, parameters.getPreviewSize().height, null);
                     yuvImage.compressToJpeg(new Rect(0, 0, parameters.getPreviewSize().width, parameters.getPreviewSize().height), 90, out);
+
+                    // convert the jpeg into bitmap for converting it to classifier
                     byte[] imageBytes = out.toByteArray();
                     bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+
                     //creating new matrix to handle image inversion and flipping
                     Matrix matrix = new Matrix();
+
                     if(camera_num == 1){
-                        //front camera needs to invert
+                        //front camera needs to vertically invert
                         //invert camera image
                         matrix.preScale(1.0f, -1.0f,bitmap.getWidth()/2f,bitmap.getHeight()/2f);
                     }
@@ -247,6 +270,8 @@ public class Camera_handle {
         camera = Camera.open(camera_num);
 
         //setting its callback function per frmae
+        // therefore, each frame extracted from camera is sent to function previewCallback
+        // https://developer.android.com/reference/android/hardware/Camera#setPreviewCallback(android.hardware.Camera.PreviewCallback)
         camera.setPreviewCallback(previewCallback);
 
     }
